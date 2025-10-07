@@ -9,8 +9,7 @@ import defaultImage from '../../../../public/images/default-image.png';
 import apiService from '@/services/services';
 import { FeedItemProps } from '@/app/interfaces/images/feedItemProps';
 import Navbar from '@/components/navbar/navbar';
-import grid from '../../../../public/icons/grid.svg';
-import { ArrowBigLeft, ArrowLeft, LayoutGrid } from 'lucide-react';
+import { ArrowLeft, LayoutGrid } from 'lucide-react';
 import { Bookmark } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
@@ -19,7 +18,6 @@ import {
   DialogClose,
   DialogContent,
   DialogDescription,
-  DialogFooter,
   DialogHeader,
   DialogTitle,
   DialogTrigger,
@@ -38,19 +36,18 @@ const Profile = () => {
     following: 0,
     likes: 0,
   });
-  const [postList, setPostList] = React.useState([]);
-  const [savedList, setSavedList] = React.useState([]);
+
+  const [postList, setPostList] = React.useState<FeedItemProps[]>([]);
+  const [savedList, setSavedList] = React.useState<FeedItemProps[]>([]);
 
   useEffect(() => {
     (async () => {
       try {
         const dataStats = await apiService.getUserStats();
-
-        // console.log('User Stats fetched successfully:', dataStats);
-
         setStats(dataStats.data.stats ?? []);
-      } catch (err: any) {
-        console.error('getUserSavedListService error:', err?.message || err);
+      } catch (err: unknown) {
+        const msg = err instanceof Error ? err.message : String(err);
+        console.error('getUserSavedListService error:', msg);
       }
     })();
   }, [auth?.user?.username]);
@@ -64,13 +61,11 @@ const Profile = () => {
         const dataPost = await apiService.getUserPostsListService(uname, 1, 20);
         const dataSaved = await apiService.getUserSavedListService(1, 20);
 
-        // console.log('User Post list fetched successfully:', dataPost);
-        // console.log('User Post list fetched successfully:', dataSaved);
-
         setPostList(dataPost?.data?.posts ?? []);
         setSavedList(dataSaved?.data?.posts ?? []);
-      } catch (err: any) {
-        console.error('getUserPostsListService error:', err?.message || err);
+      } catch (err: unknown) {
+        const msg = err instanceof Error ? err.message : String(err);
+        console.error('getUserPostsListService error:', msg);
       }
     })();
   }, [auth?.user?.username]);
@@ -79,12 +74,10 @@ const Profile = () => {
     (async () => {
       try {
         const dataSaved = await apiService.getUserSavedListService(1, 20);
-
-        // console.log('User Post list fetched successfully:', dataSaved);
-
         setSavedList(dataSaved?.data?.posts ?? []);
-      } catch (err: any) {
-        console.error('getUserSavedListService error:', err?.message || err);
+      } catch (err: unknown) {
+        const msg = err instanceof Error ? err.message : String(err);
+        console.error('getUserSavedListService error:', msg);
       }
     })();
   }, [auth?.user?.username]);
@@ -115,8 +108,8 @@ const Profile = () => {
             </Button>
           </div>
           <div className="text-foreground text-sm md:text-md">
-            Creating unforgettable moments with my favorite person! 📸✨ Let's
-            cherish every second together!
+            Creating unforgettable moments with my favorite person! 📸✨
+            Let&apos;s
           </div>
 
           {/* Stats */}
@@ -172,7 +165,7 @@ const Profile = () => {
 
             {/* Gallery Tabs */}
             <TabsContent value="gallery">
-              <div className="w-full grid grid-cols-3 gap-2 ">
+              <div className="w-full grid grid-cols-3 gap-1 ">
                 {postList.map((post: FeedItemProps) => (
                   <div key={post.id} className="rounded-2xl focus:outline-none">
                     <Dialog>
@@ -182,13 +175,13 @@ const Profile = () => {
                           alt="image"
                           width={268}
                           height={268}
-                          className="max-w-30 max-h-30 md:max-w-67 md:max-h-67 object-cover rounded-2xl"
+                          className="max-w-30 max-h-30 md:max-w-63 md:max-h-63 object-cover rounded-2xl"
                         />
                       </DialogTrigger>
 
                       <DialogContent
                         showCloseButton={false}
-                        className="max-w-none w-full h-full  md:!w-[1200px] md:!max-w-[90vw] flex flex-col gap-4"
+                        className="max-w-none w-full h-full  md:!w-[1200px] md:!max-w-[90vw] md:max-h-[768px] flex flex-col gap-4"
                       >
                         <DialogHeader className="h-5 flex flex-row justify-start items-center ">
                           <DialogClose asChild>
@@ -212,9 +205,7 @@ const Profile = () => {
                               username: post.author?.username ?? 'John Doe',
                               name: post.author?.name ?? 'John Doe',
                               avatarUrl:
-                                (post.author?.avatarUrl as any) ??
-                                (defaultAvatar as any).src ??
-                                defaultAvatar,
+                                post.author?.avatarUrl ?? defaultAvatar,
                             }}
                             likeCount={post.likeCount ?? 0}
                             commentCount={post.commentCount ?? 0}
@@ -244,34 +235,45 @@ const Profile = () => {
                           alt="image"
                           width={268}
                           height={268}
-                          className="max-w-30 max-h-30 md:max-w-67 md:max-h-67 object-cover rounded-2xl"
+                          className="max-w-30 max-h-30 md:max-w-63 md:max-h-63 object-cover rounded-2xl"
                         />
                       </DialogTrigger>
 
-                      <DialogContent className="w-full max-h-[80vh] md:!w-[1200px] md:!max-w-[90vw]">
-                        <DialogHeader>
-                          <DialogTitle className="hidden">Detail</DialogTitle>
+                      <DialogContent
+                        showCloseButton={false}
+                        className="max-w-none w-full h-full  md:!w-[1200px] md:!max-w-[90vw] md:max-h-[768px] flex flex-col gap-4"
+                      >
+                        <DialogHeader className="h-5 flex flex-row justify-start items-center ">
+                          <DialogClose asChild>
+                            <DialogTitle
+                              className="cursor-pointer transition flex flex-row justify-start items-start gap-2"
+                              title="Click to close"
+                            >
+                              <ArrowLeft />
+                              <div>Back</div>
+                            </DialogTitle>
+                          </DialogClose>
                         </DialogHeader>
-                        <DetailPageByID
-                          id={post.id}
-                          imageUrl={post.imageUrl ?? defaultImage}
-                          caption={post.caption ?? ''}
-                          createdAt={post.createdAt ?? '-'}
-                          author={{
-                            id: post.author?.id ?? 0,
-                            username: post.author?.username ?? 'John Doe',
-                            name: post.author?.name ?? 'John Doe',
-                            avatarUrl:
-                              (post.author?.avatarUrl as any) ??
-                              (defaultAvatar as any).src ??
-                              defaultAvatar,
-                          }}
-                          likeCount={post.likeCount ?? 0}
-                          commentCount={post.commentCount ?? 0}
-                          likedByMe={!!post.likedByMe}
-                        />
+                        <div className="w-full  h-full ">
+                          <DetailPageByID
+                            id={post.id}
+                            imageUrl={post.imageUrl ?? defaultImage}
+                            caption={post.caption ?? ''}
+                            createdAt={post.createdAt ?? '-'}
+                            author={{
+                              id: post.author?.id ?? 0,
+                              username: post.author?.username ?? 'John Doe',
+                              name: post.author?.name ?? 'John Doe',
+                              avatarUrl:
+                                post.author?.avatarUrl ?? defaultAvatar,
+                            }}
+                            likeCount={post.likeCount ?? 0}
+                            commentCount={post.commentCount ?? 0}
+                            likedByMe={!!post.likedByMe}
+                          />
+                        </div>
+
                         <DialogDescription className="hidden">
-                          {' '}
                           {post.caption}
                         </DialogDescription>
                       </DialogContent>

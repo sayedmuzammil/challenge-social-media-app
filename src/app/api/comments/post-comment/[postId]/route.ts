@@ -16,14 +16,18 @@ export async function POST(
     }
 
     // Expecting { text: string } from client
-    let body: any = null;
+    let body: unknown;
     try {
       body = await request.json();
     } catch {
       return NextResponse.json({ error: 'Invalid JSON body' }, { status: 400 });
     }
 
-    const text = body?.text?.toString().trim();
+    let text: string | null = null;
+    if (body && typeof body === 'object' && 'text' in body) {
+      const v = (body as Record<string, unknown>).text;
+      if (typeof v === 'string') text = v.trim();
+    }
     if (!text) {
       return NextResponse.json(
         { error: 'Field "text" is required' },
@@ -60,6 +64,7 @@ export async function POST(
     return NextResponse.json(data, { status });
   } catch (error: any) {
     // Normalize error
+
     const status = error?.response?.status ?? 500;
     const payload = error?.response?.data ?? {
       error: 'Upstream error',

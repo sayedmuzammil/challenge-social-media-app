@@ -7,15 +7,15 @@ import Navbar from '@/components/navbar/navbar';
 import apiService from '@/services/services';
 import { useAuth } from '@/lib/auth';
 
-type ProfileForm = {
-  avatarUrl?: string;
-  bio?: string;
-  name: string;
-  username: string;
-  phone: string;
-  createdAt: string;
-  id: number;
-};
+// type ProfileForm = {
+//   avatarUrl?: string;
+//   bio?: string;
+//   name: string;
+//   username: string;
+//   phone: string;
+//   createdAt: string;
+//   id: number;
+// };
 
 export default function EditProfilePage() {
   const auth = useAuth();
@@ -25,7 +25,7 @@ export default function EditProfilePage() {
   const [phone, setPhone] = React.useState('');
   const [bio, setBio] = React.useState('');
 
-  const [form, setForm] = React.useState<ProfileForm>();
+  // const [form, setForm] = React.useState<ProfileForm>();
 
   const [avatarUrl, setAvatarUrl] = React.useState<string>(
     '/images/default-avatar.png'
@@ -42,7 +42,7 @@ export default function EditProfilePage() {
 
         console.log('User profile fetched successfully:', dataStats);
 
-        setForm(dataStats.data.profile ?? []);
+        // setForm(dataStats.data.profile ?? []);
 
         if (dataStats.data.profile) {
           setName(dataStats.data.profile.name);
@@ -51,8 +51,12 @@ export default function EditProfilePage() {
           setBio(dataStats.data.profile.bio);
           setAvatarUrl(dataStats.data.profile.avatarUrl);
         }
-      } catch (err: any) {
-        console.error('getUserSavedListService error:', err?.message || err);
+      } catch (err: unknown) {
+        if (err instanceof Error) {
+          console.error('getUserSavedListService error:', err.message);
+        } else {
+          console.error('getUserSavedListService error:', err);
+        }
       }
     })();
   }, [auth?.user?.username]);
@@ -69,11 +73,11 @@ export default function EditProfilePage() {
     setAvatarUrl(url);
   }
 
-  function onRemovePhoto() {
-    setAvatarFile(null);
-    setAvatarUrl('/images/default-avatar.png');
-    if (fileInputRef.current) fileInputRef.current.value = '';
-  }
+  // function onRemovePhoto() {
+  //   setAvatarFile(null);
+  //   setAvatarUrl('/images/default-avatar.png');
+  //   if (fileInputRef.current) fileInputRef.current.value = '';
+  // }
 
   // function set<K extends keyof ProfileForm>(key: K, v: ProfileForm[K]) {
   //   setForm((f) => ({ ...f, [key]: v }));
@@ -135,16 +139,18 @@ export default function EditProfilePage() {
       console.log('[submit] internal route status:', res.status);
       console.log('[submit] internal route raw:', raw);
 
-      let json: any = raw;
+      type ErrPayload = { error?: string | { message?: string } };
+      let json: ErrPayload = {};
       try {
-        json = JSON.parse(raw);
+        json = JSON.parse(raw) as ErrPayload;
       } catch {}
 
       if (!res.ok) {
-        throw new Error(
-          (json && (json.error?.message || json.error)) ||
-            `Update failed with ${res.status}`
-        );
+        const msg =
+          typeof json.error === 'string'
+            ? json.error
+            : json.error?.message || `Update failed with ${res.status}`;
+        throw new Error(msg);
       }
 
       router.push('/profile');

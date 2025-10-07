@@ -110,17 +110,25 @@ const RegisterPage: React.FC = () => {
         setPhone('');
         setPassword('');
         setConfirmPassword('');
-
-        setTimeout(() => {
-          router.push('/login');
-        }, 2000);
+        setTimeout(() => router.push('/login'), 2000);
+        return; // prevent falling through
       }
 
-      if (!res.ok) {
-        throw new Error('Registration failed. Please try again.');
+      // not ok
+      throw new Error('Registration failed. Please try again.');
+    } catch (err: unknown) {
+      let message = 'Registration failed. Please try again.';
+      if (err instanceof Error) {
+        message = err.message;
+      } else if (
+        typeof err === 'object' &&
+        err !== null &&
+        'message' in err &&
+        typeof (err as { message?: unknown }).message === 'string'
+      ) {
+        message = (err as { message: string }).message;
       }
-    } catch (err: any) {
-      setError(err?.message ?? 'Registration failed. Please try again.');
+      setError(message);
     }
   };
 

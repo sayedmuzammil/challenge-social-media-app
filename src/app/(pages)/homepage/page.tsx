@@ -1,6 +1,5 @@
 import Navbar from '@/components/navbar/navbar';
 import Feed from '@/features/feed/feed';
-import UserAuthContent from '@/components/user/user-auth-content';
 import React from 'react';
 
 const Homepage = () => {

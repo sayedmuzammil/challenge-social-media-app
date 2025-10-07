@@ -1,6 +1,4 @@
-import axios from 'axios';
 import { NextRequest, NextResponse } from 'next/server';
-import apiService from '@/services/services';
 import { apiEndpoints } from '../../../endpoints';
 
 export async function GET(
@@ -30,7 +28,7 @@ export async function GET(
 
     console.log('apiUrl : ', apiUrl);
 
-    const auth = request.headers.get('authorization') || '';
+    // const auth = request.headers.get('authorization') || '';
 
     // axios version
     // const { data } = await axios.get(apiUrl);
@@ -39,40 +37,36 @@ export async function GET(
     // fetch version
     const response = await fetch(apiUrl, {
       method: 'GET',
-      headers: { accept: '*/*' },
-      // cache: 'no-store', // uncomment if you always want fresh data
+      headers: {
+        accept: '*/*',
+      },
+      // cache: 'no-store',
     });
 
     const text = await response.text();
-    let data: any = null;
+    let data: unknown = null;
     try {
       data = text ? JSON.parse(text) : null;
     } catch {
-      // leave as text if not JSON
-      data = text;
+      data = text; // keep raw text if not JSON
     }
 
     if (!response.ok) {
-      return NextResponse.json(
-        {
-          error:
-            (data && (data.error || data.message)) || `HTTP ${response.status}`,
-        },
-        { status: response.status }
-      );
+      let message = `HTTP ${response.status}`;
+      if (data && typeof data === 'object') {
+        const maybeErr = data as { error?: unknown; message?: unknown };
+        if (typeof maybeErr.error === 'string') message = maybeErr.error;
+        else if (typeof maybeErr.message === 'string')
+          message = maybeErr.message;
+      }
+      return NextResponse.json({ error: message }, { status: response.status });
     }
 
     return NextResponse.json(data);
-  } catch (error: any) {
-    console.error(
-      'Failed to get Feed : ',
-      error.response?.data || error.message
-    );
-    return NextResponse.json(
-      {
-        error: error.response?.data || 'Internal Server Error',
-      },
-      { status: error.response?.status || 500 }
-    );
+  } catch (err: unknown) {
+    let message = 'Internal Server Error';
+    if (err instanceof Error && err.message) message = err.message;
+    console.error('Failed to get comments:', err);
+    return NextResponse.json({ error: message }, { status: 500 });
   }
 }

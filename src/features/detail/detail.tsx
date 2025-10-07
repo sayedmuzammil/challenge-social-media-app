@@ -4,26 +4,17 @@ import { Author } from '@/app/interfaces/user/author';
 import { CommentProps } from '@/app/interfaces/user/commentProps';
 import {
   Drawer,
-  DrawerClose,
   DrawerContent,
-  DrawerDescription,
-  DrawerFooter,
   DrawerHeader,
   DrawerTitle,
   DrawerTrigger,
 } from '@/components/ui/drawer';
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from '@/components/ui/popover';
-import CommentList from '@/components/user/user-comment-list';
+
 import { useBookmarks } from '@/context/bookmark-context';
 import apiService from '@/services/services';
-import { Bookmark, Heart, MessageSquareMore, Smile } from 'lucide-react';
+import { Bookmark, Heart, MessageSquareMore } from 'lucide-react';
 import Image, { StaticImageData } from 'next/image';
 import React, { useEffect } from 'react';
-import { Button } from '@/components/ui/button';
 import PostCommentComponent from '../post-comment/post-comment';
 import { Emojis } from '../emoji/emoji';
 import { ScrollArea } from '@/components/ui/scroll-area';
@@ -183,9 +174,9 @@ const DetailPageByID: React.FC<DetailPageByIDProps> = ({
 
         {/* Content Section */}
         <div className="h-full w-full flex flex-col justify-between md:p-5  ">
-          <div className="flex flex-col justify-between">
+          <div className="hidden md:flex flex-col justify-between">
             {/* Author Info */}
-            {/* <div className="flex flex-row gap-3 mb-6">
+            <div className="flex flex-row gap-3 mb-6">
               <div className="flex items-center">
                 <Image
                   src={author.avatarUrl || '/images/default-avatar.png'}
@@ -199,12 +190,12 @@ const DetailPageByID: React.FC<DetailPageByIDProps> = ({
                 <div className="text-md font-bold">{author.username}</div>
                 <div className="text-sm text-gray-500">{createdAt}</div>
               </div>
-            </div> */}
+            </div>
 
             {/* Caption */}
-            {/* <div className="text-md mb-6">{caption}</div>
+            <div className="text-md mb-6">{caption}</div>
 
-            <div className="border-t border-gray-200 mb-4" /> */}
+            <div className="border-t border-border mb-4" />
 
             {/* Comments Section */}
             {/* <div className="flex-1 overflow-y-auto mb-4">
