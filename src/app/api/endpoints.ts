@@ -1,0 +1,17 @@
+import { use } from 'react';
+
+export const apiEndpoints = {
+  login: '/auth/login',
+  register: '/auth/register',
+  feed: '/feed',
+  userPostsList: '/users/:username/posts',
+  userSavedList: '/me/saved',
+  userStats: '/me',
+  updateProfile: '/me',
+  likePostById: '/posts/:postId/like',
+  deleteLikePostById: '/posts/:postId/like',
+  savePostById: '/posts/:postId/save',
+  deleteSavePostById: '/posts/:postId/save',
+  getCommentsListById: '/posts/:postId/comments',
+  postComment: '/posts/:postId/comments',
+};
