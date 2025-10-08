@@ -3,10 +3,11 @@ import { apiEndpoints } from '../../../endpoints';
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { postId: string } }
+  { params }: { params: Promise<{ postId: string }> }
 ) {
   try {
-    const postIdParam = params.postId;
+    // Await the params
+    const { postId: postIdParam } = await params;
 
     if (!postIdParam) {
       return NextResponse.json(
@@ -28,19 +29,11 @@ export async function GET(
 
     console.log('apiUrl : ', apiUrl);
 
-    // const auth = request.headers.get('authorization') || '';
-
-    // axios version
-    // const { data } = await axios.get(apiUrl);
-    // return NextResponse.json(data);
-
-    // fetch version
     const response = await fetch(apiUrl, {
       method: 'GET',
       headers: {
         accept: '*/*',
       },
-      // cache: 'no-store',
     });
 
     const text = await response.text();
@@ -48,7 +41,7 @@ export async function GET(
     try {
       data = text ? JSON.parse(text) : null;
     } catch {
-      data = text; // keep raw text if not JSON
+      data = text;
     }
 
     if (!response.ok) {

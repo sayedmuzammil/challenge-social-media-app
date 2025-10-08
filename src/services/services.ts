@@ -1,3 +1,48 @@
+import { Author } from '@/app/interfaces/user/author';
+
+const parseJSON = <T = unknown>(text: string): T | null => {
+  try {
+    return text ? (JSON.parse(text) as T) : null;
+  } catch {
+    return null;
+  }
+};
+
+// Minimal shapes used by the UI
+type LikeResponse = {
+  success?: boolean;
+  likeCount?: number;
+  likedByMe?: boolean;
+  message?: string;
+  error?: string;
+  [k: string]: unknown;
+};
+
+type SaveResponse = {
+  success?: boolean;
+  saved?: boolean;
+  message?: string;
+  error?: string;
+  [k: string]: unknown;
+};
+
+type CommentItem = {
+  id: number;
+  text: string;
+  createdAt?: string;
+  author: Author;
+};
+
+type CommentsResponse = {
+  success?: boolean;
+  data?: {
+    comments?: CommentItem[];
+    pagination?: { page: number; totalPages: number };
+  };
+  message?: string;
+  error?: string;
+};
+
 const loginService = async (email: string, password: string) => {
   const response = await fetch(`/api/login`, {
     method: 'POST',
@@ -194,10 +239,7 @@ export const likePostByIdService = async (postId: number | string) => {
   });
 
   const text = await res.text();
-  let data: any = null;
-  try {
-    data = text ? JSON.parse(text) : null;
-  } catch {}
+  const data = parseJSON<LikeResponse>(text);
 
   if (!res.ok) {
     const message =
@@ -222,10 +264,7 @@ export const deleteLikePostByIdService = async (postId: number | string) => {
   });
 
   const text = await res.text();
-  let data: any = null;
-  try {
-    data = text ? JSON.parse(text) : null;
-  } catch {}
+  const data = parseJSON<LikeResponse>(text);
 
   if (!res.ok) {
     const message =
@@ -250,10 +289,7 @@ const savePostByIdService = async (postId: number | string) => {
   });
 
   const text = await res.text();
-  let data: any = null;
-  try {
-    data = text ? JSON.parse(text) : null;
-  } catch {}
+  const data = parseJSON<SaveResponse>(text);
 
   if (!res.ok) {
     const message =
@@ -278,10 +314,7 @@ const deleteSavePostByIdService = async (postId: number | string) => {
   });
 
   const text = await res.text();
-  let data: any = null;
-  try {
-    data = text ? JSON.parse(text) : null;
-  } catch {}
+  const data = parseJSON<CommentsResponse>(text);
 
   if (!res.ok) {
     const message =
@@ -299,7 +332,7 @@ export const getCommentListByID = async (
   page = 1,
   limit = 20
 ) => {
-  const token = localStorage.getItem('token');
+  // const token = localStorage.getItem('token');
 
   const res = await fetch(
     `/api/comments/get-comment-by-id/${postId}?page=${page}&limit=${limit}`,
@@ -313,10 +346,7 @@ export const getCommentListByID = async (
   );
 
   const text = await res.text();
-  let data: any = null;
-  try {
-    data = text ? JSON.parse(text) : null;
-  } catch {}
+  const data = parseJSON<CommentsResponse>(text);
 
   if (!res.ok) {
     const message =

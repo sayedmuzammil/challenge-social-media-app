@@ -19,16 +19,11 @@ export async function POST(request: NextRequest) {
     console.log('Register response : ', response);
 
     return NextResponse.json(response.data);
-  } catch (error: any) {
-    console.error(
-      'Failed to register : ',
-      error.response?.data || error.message
-    );
-    return NextResponse.json(
-      {
-        error: error.response?.data || 'Internal Server Error',
-      },
-      { status: error.response?.status || 500 }
-    );
+  } catch (err: unknown) {
+    let message = 'Internal Server Error';
+    if (err instanceof Error && err.message) message = err.message;
+    console.error('Error:', err);
+
+    return NextResponse.json({ error: message }, { status: 500 });
   }
 }

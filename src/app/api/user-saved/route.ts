@@ -34,12 +34,11 @@ export async function GET(request: NextRequest) {
     });
 
     return NextResponse.json(data, { status });
-  } catch (error: any) {
-    const status = error?.response?.status || 500;
-    const payload = error?.response?.data || {
-      message: error?.message || 'Internal Server Error',
-    };
-    console.error('GET /api/me/saved proxy failed:', payload);
-    return NextResponse.json({ error: payload }, { status });
+  } catch (err: unknown) {
+    let message = 'Internal Server Error';
+    if (err instanceof Error && err.message) message = err.message;
+    console.error('Error:', err);
+
+    return NextResponse.json({ error: message }, { status: 500 });
   }
 }

@@ -4,10 +4,11 @@ import { apiEndpoints } from '../../endpoints';
 
 export async function POST(
   request: NextRequest,
-  context: { params: { postId: string } }
+  context: { params: Promise<{ postId: string }> }
 ) {
   try {
-    const postIdParam = context.params.postId;
+    // Await the params
+    const { postId: postIdParam } = await context.params;
 
     if (!postIdParam) {
       return NextResponse.json(
@@ -23,7 +24,6 @@ export async function POST(
     console.log('apiUrl : ', apiUrl);
 
     const auth = request.headers.get('authorization') || '';
-
     // axios version
     const { data } = await axios.delete(apiUrl, {
       method: 'DELETE', // 👈 UNSAVE = DELETE (upstream)
@@ -44,16 +44,11 @@ export async function POST(
     //   },
     // });
     // return NextResponse.json(response);
-  } catch (error: any) {
-    console.error(
-      'Failed to get Feed : ',
-      error.response?.data || error.message
-    );
-    return NextResponse.json(
-      {
-        error: error.response?.data || 'Internal Server Error',
-      },
-      { status: error.response?.status || 500 }
-    );
+  } catch (err: unknown) {
+    let message = 'Internal Server Error';
+    if (err instanceof Error && err.message) message = err.message;
+    console.error('Error:', err);
+
+    return NextResponse.json({ error: message }, { status: 500 });
   }
 }

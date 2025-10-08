@@ -1,13 +1,14 @@
-// app/api/comments/post-comment/[postId]/route.ts
 import { NextRequest, NextResponse } from 'next/server';
 import axios from 'axios';
 
 export async function POST(
   request: NextRequest,
-  { params }: { params: { postId: string } }
+  { params }: { params: Promise<{ postId: string }> }
 ) {
   try {
-    const postId = params?.postId;
+    // Await the params
+    const { postId } = await params;
+
     if (!postId) {
       return NextResponse.json(
         { error: 'Post ID is required' },
@@ -37,12 +38,6 @@ export async function POST(
 
     // Forward the same Bearer token the client sent to us
     const auth = request.headers.get('authorization') || '';
-    // if (!auth.toLowerCase().startsWith('bearer ')) {
-    //   return NextResponse.json(
-    //     { error: 'Missing or invalid Authorization header' },
-    //     { status: 401 }
-    //   );
-    // }
 
     const base = process.env.NEXT_PUBLIC_BASE_API_URL?.replace(/\/+$/, '');
 
@@ -62,15 +57,11 @@ export async function POST(
     );
 
     return NextResponse.json(data, { status });
-  } catch (error: any) {
-    // Normalize error
+  } catch (err: unknown) {
+    let message = 'Internal Server Error';
+    if (err instanceof Error && err.message) message = err.message;
+    console.error('Error:', err);
 
-    const status = error?.response?.status ?? 500;
-    const payload = error?.response?.data ?? {
-      error: 'Upstream error',
-      message: error?.message || 'Unknown error',
-    };
-
-    return NextResponse.json(payload, { status });
+    return NextResponse.json({ error: message }, { status: 500 });
   }
 }

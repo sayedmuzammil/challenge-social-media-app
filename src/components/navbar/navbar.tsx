@@ -28,6 +28,8 @@ const Navbar = () => {
     setIsDarkMode(initial);
   }, []); // ← run once
 
+  console.log(isDarkMode);
+
   /*   if (localStorage.getItem('user')) {
     setAvatar(localStorage.getItem('user') || avatar);
   }

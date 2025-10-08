@@ -13,7 +13,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 const Feed: React.FC = () => {
   const [feed, setFeed] = useState<FeedItemProps[]>([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const [error] = useState<string | null>(null);
 
   const { hydrate, lastSyncedAt } = useBookmarks();
 
@@ -28,9 +28,10 @@ const Feed: React.FC = () => {
         const data = await apiService.getFeedService(1, 20);
         console.log('Book data fetched successfully:', data.data.items);
         setFeed(data.data.items);
-      } catch (err: any) {
-        console.error(err);
-        setError(err.message || 'Failed to load feed');
+      } catch (err: unknown) {
+        const message =
+          err instanceof Error ? err.message : 'Failed to load feed';
+        console.error('Failed to load feed:', message);
       } finally {
         setLoading(false);
       }

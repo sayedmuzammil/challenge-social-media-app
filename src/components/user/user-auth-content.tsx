@@ -1,6 +1,6 @@
 'use client';
 
-import Image, { StaticImageData } from 'next/image';
+import Image from 'next/image';
 import React from 'react';
 import defaultAvatar from '../../../public/images/default-avatar.png';
 import defaultImage from '../../../public/images/default-image.png';
@@ -8,15 +8,12 @@ import { UserAuthContentProps } from '@/app/interfaces/user/UserAuthContentProps
 import { Bookmark, Heart, MessageSquareMore } from 'lucide-react';
 import {
   Dialog,
-  DialogClose,
   DialogContent,
   DialogDescription,
-  DialogFooter,
   DialogHeader,
   DialogTitle,
   DialogTrigger,
 } from '../ui/dialog';
-import { Button } from '../ui/button';
 import DetailPageByID from '../../features/detail/detail';
 import apiService from '@/services/services';
 import { useBookmarks } from '../../context/bookmark-context';
@@ -31,9 +28,7 @@ const UserContent: React.FC<UserAuthContentProps> = ({
   commentCount,
   likedByMe,
 }) => {
-  const [username, setUsername] = React.useState<string>(
-    author.username ?? 'John Doe'
-  );
+  const username = author.username ?? 'John Doe'; // no unused setter
   const [isLiked, setIsLiked] = React.useState(likedByMe ?? false);
   const [isSeeMore, setIsSeeMore] = React.useState(false);
   const [currentLikeCount, setCurrentLikeCount] = React.useState(
@@ -59,7 +54,7 @@ const UserContent: React.FC<UserAuthContentProps> = ({
       if (data?.likedByMe !== undefined) {
         setIsLiked(data.likedByMe);
       }
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error('Like failed:', err);
       setIsLiked(wasLiked);
       setCurrentLikeCount(likeCount ?? 0);
@@ -114,10 +109,7 @@ const UserContent: React.FC<UserAuthContentProps> = ({
                 username: author?.username ?? 'John Doe',
                 name: author?.name ?? 'John Doe',
                 // If your Author.avatarUrl type is string-only, use defaultAvatar.src
-                avatarUrl:
-                  (author?.avatarUrl as any) ??
-                  (defaultAvatar as any).src ??
-                  defaultAvatar,
+                avatarUrl: (author?.avatarUrl as string) ?? defaultAvatar,
               }}
               likeCount={likeCount ?? 0}
               commentCount={commentCount ?? 0}

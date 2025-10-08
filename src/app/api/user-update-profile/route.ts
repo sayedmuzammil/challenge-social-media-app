@@ -24,9 +24,10 @@ export async function PATCH(request: NextRequest) {
 
     // Read incoming FormData
     const incoming = await request.formData();
-    const debugEntries: Record<string, any> = {};
+    const debugEntries: Record<string, string> = {};
     for (const [k, v] of incoming.entries()) {
-      debugEntries[k] = v instanceof File ? `File(${v.name}, ${v.size}B)` : v;
+      debugEntries[k] =
+        v instanceof File ? `File(${v.name}, ${v.size}B)` : String(v);
     }
     console.log('[PATCH] incoming entries:', debugEntries);
 
@@ -68,22 +69,30 @@ export async function PATCH(request: NextRequest) {
     console.log('[PATCH] upstream status:', status);
     console.log('[PATCH] upstream response:', text);
 
-    let payload: any = text;
+    let payload: unknown = text;
     try {
-      payload = JSON.parse(text);
+      payload = JSON.parse(text) as unknown;
     } catch {}
 
     if (!upstream.ok) {
+      // Normalize error message without using `any`
+      let message = `HTTP ${status}`;
+      if (payload && typeof payload === 'object') {
+        const p = payload as { error?: unknown; message?: unknown };
+        if (typeof p.error === 'string') message = p.error;
+        else if (typeof p.message === 'string') message = p.message;
+      } else if (typeof payload === 'string' && payload) {
+        message = payload;
+      }
       console.error('[PATCH] upstream error:', status, payload);
-      return NextResponse.json({ error: payload }, { status });
+      return NextResponse.json({ error: message }, { status });
     }
 
     return NextResponse.json(payload, { status: 200 });
-  } catch (e: any) {
-    console.error('[PATCH] exception:', e);
-    return NextResponse.json(
-      { error: e?.message || 'Internal Server Error' },
-      { status: 500 }
-    );
+  } catch (err: unknown) {
+    const message =
+      err instanceof Error ? err.message : 'Internal Server Error';
+    console.error('Error:', err);
+    return NextResponse.json({ error: message }, { status: 500 });
   }
 }

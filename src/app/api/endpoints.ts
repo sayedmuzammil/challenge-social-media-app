@@ -1,5 +1,3 @@
-import { use } from 'react';
-
 export const apiEndpoints = {
   login: '/auth/login',
   register: '/auth/register',

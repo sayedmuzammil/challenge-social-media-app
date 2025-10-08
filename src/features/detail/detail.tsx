@@ -37,7 +37,7 @@ const DetailPageByID: React.FC<DetailPageByIDProps> = ({
   caption,
   createdAt,
   author,
-  commentList = [],
+  // commentList = [],
   likeCount = 0,
   commentCount = 0,
   likedByMe,
@@ -48,7 +48,7 @@ const DetailPageByID: React.FC<DetailPageByIDProps> = ({
   const [emojiOpen, setEmojiOpen] = React.useState(false);
   const inputRef = React.useRef<HTMLInputElement>(null);
   const caretRef = React.useRef<number | null>(null);
-  const [openComment, setOpenComment] = React.useState(false);
+  // const [openComment, setOpenComment] = React.useState(false);
   const [commentsList, setCommentsList] = React.useState<CommentProps[]>([]);
   const [loadingComments, setLoadingComments] = React.useState(false);
 
@@ -100,8 +100,10 @@ const DetailPageByID: React.FC<DetailPageByIDProps> = ({
       );
       console.log('Comment posted:', response);
       setComment('');
-    } catch (err: any) {
-      console.error('Failed to post comment:', err?.message || err);
+    } catch (err: unknown) {
+      const message =
+        err instanceof Error ? err.message : 'Failed to post comment';
+      console.error('Failed to post comment:', message);
     }
   };
 
@@ -112,26 +114,45 @@ const DetailPageByID: React.FC<DetailPageByIDProps> = ({
     author: Author;
   }
 
-  const handleCommentClick = () => {
-    setOpenComment(!openComment);
-    console.log('openComment:', openComment);
-  };
+  // const handleCommentClick = () => {
+  //   setOpenComment(!openComment);
+  //   console.log('openComment:', openComment);
+  // };
+
+  // useEffect(() => {
+  //   (async () => {
+  //     try {
+  //       const response = await apiService.getCommentListByID(id, 1, 10);
+  //       console.log('Raw comments response:', response);
+  //       const items = response?.data?.comments;
+  //       console.log('Comments fetched:', items);
+  //       setCommentsList(items);
+  //     } catch (err: unknown) {
+  //       const message =
+  //         err instanceof Error ? err.message : 'Failed to fetch comment';
+  //       console.error('Failed to fetch comment:', message);
+  //     } finally {
+  //       setLoadingComments(false);
+  //     }
+  //   })();
+  // }, [id]);
 
   useEffect(() => {
     (async () => {
       try {
         const response = await apiService.getCommentListByID(id, 1, 10);
-        console.log('Raw comments response:', response);
-        const items = response?.data?.comments;
-        console.log('Comments fetched:', items);
-        setCommentsList(items);
-      } catch (err: any) {
-        console.error('Failed to fetch comments:', err?.message || err);
+        const items = response?.data?.comments ?? [];
+        setCommentsList(items as CommentProps[]);
+      } catch (err: unknown) {
+        const message =
+          err instanceof Error ? err.message : 'Failed to fetch comment';
+        console.error('Failed to fetch comment:', message);
+        setCommentsList([]); // ensure state stays an array
       } finally {
         setLoadingComments(false);
       }
     })();
-  }, []);
+  }, [id]);
 
   return (
     <div className="h-full w-full md:max-w-[1200px] mx-auto ">
