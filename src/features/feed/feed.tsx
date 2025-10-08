@@ -9,10 +9,18 @@ import UserContent from '../../components/user/user-auth-content';
 import apiService from '@/services/services';
 import { FeedItemProps } from '../../../src/app/interfaces/images/feedItemProps';
 import { Skeleton } from '@/components/ui/skeleton';
+import { Button } from '@/components/ui/button';
+
+const limit = 20;
 
 const Feed: React.FC = () => {
   const [feed, setFeed] = useState<FeedItemProps[]>([]);
+  const [page, setPage] = useState(1);
+
   const [loading, setLoading] = useState(true);
+  const [loadingMore, setLoadingMore] = useState(false);
+  const [hasMore, setHasMore] = useState(true);
+
   const [error] = useState<string | null>(null);
 
   const { hydrate, lastSyncedAt } = useBookmarks();
@@ -25,9 +33,16 @@ const Feed: React.FC = () => {
 
     (async () => {
       try {
-        const data = await apiService.getFeedService(1, 20);
-        console.log('Book data fetched successfully:', data.data.items);
+        const data = await apiService.getFeedService(1, limit);
+        const items: FeedItemProps[] = data?.data?.items || [];
         setFeed(data.data.items);
+        setHasMore(items.length === limit);
+        setPage(2);
+
+        // console.log(
+        //   'Book data fetched successfully:',
+        //   data.data.items
+        // );
       } catch (err: unknown) {
         const message =
           err instanceof Error ? err.message : 'Failed to load feed';
@@ -37,6 +52,23 @@ const Feed: React.FC = () => {
       }
     })();
   }, [lastSyncedAt, hydrate]);
+
+  const handleLoadMore = async () => {
+    if (loadingMore || !hasMore) return;
+    setLoadingMore(true);
+    try {
+      const data = await apiService.getFeedService(page, limit);
+      const items: FeedItemProps[] = data?.data?.items || [];
+      setFeed((prev) => [...prev, ...items]);
+      setHasMore(items.length === limit);
+      setPage(page + 1);
+      setLoadingMore(false);
+    } catch (error) {
+      console.error('Failed to load more feed:', error);
+    } finally {
+      setLoadingMore(false);
+    }
+  };
 
   if (loading)
     return (
@@ -88,6 +120,18 @@ const Feed: React.FC = () => {
           />
         ))}
       </div>
+
+      {hasMore && (
+        <div className="flex justify-center">
+          <Button
+            onClick={handleLoadMore}
+            disabled={loadingMore}
+            className="w-full max-w-xs"
+          >
+            {loadingMore ? 'Loading...' : 'Load More'}
+          </Button>
+        </div>
+      )}
     </div>
   );
 };

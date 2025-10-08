@@ -93,6 +93,7 @@ const getFeedService = async (page = 1, limit = 20) => {
   const token = localStorage.getItem('token');
   const res = await fetch(`/api/feed?page=${page}&limit=${limit}`, {
     method: 'GET',
+    cache: 'no-store',
     headers: {
       accept: '*/*',
       Authorization: `Bearer ${token ?? ''}`,
@@ -160,15 +161,21 @@ const getUserPostsListService = async (
   return res.json();
 };
 
-const getUserSavedListService = async (page: number, limit: number) => {
+const getUserSavedListService = async (
+  page: number,
+  limit: number
+) => {
   const token = localStorage.getItem('token');
-  const res = await fetch(`/api/user-saved?page=${page}&limit=${limit}`, {
-    method: 'GET',
-    headers: {
-      accept: '*/*',
-      Authorization: `Bearer ${token ?? ''}`,
-    },
-  });
+  const res = await fetch(
+    `/api/user-saved?page=${page}&limit=${limit}`,
+    {
+      method: 'GET',
+      headers: {
+        accept: '*/*',
+        Authorization: `Bearer ${token ?? ''}`,
+      },
+    }
+  );
   // console.log('res : ', res);
 
   if (!res.ok) {
@@ -227,7 +234,9 @@ const updateProfileService = async (
   return res.json();
 };
 
-export const likePostByIdService = async (postId: number | string) => {
+export const likePostByIdService = async (
+  postId: number | string
+) => {
   const token = localStorage.getItem('token');
 
   const res = await fetch(`/api/like-post-by-id/${postId}`, {
@@ -252,7 +261,9 @@ export const likePostByIdService = async (postId: number | string) => {
   return data;
 };
 
-export const deleteLikePostByIdService = async (postId: number | string) => {
+export const deleteLikePostByIdService = async (
+  postId: number | string
+) => {
   const token = localStorage.getItem('token');
 
   const res = await fetch(`/api/delete-like-post-by-id/${postId}`, {
